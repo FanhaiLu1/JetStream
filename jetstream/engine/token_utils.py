@@ -161,6 +161,7 @@ def process_result_tokens(
         str(slot_lengths),
     )
   sample_return = []
+  token_return = []
   for idx in range(samples):
     string_so_far = ""
     if not complete[idx].item():
@@ -179,6 +180,8 @@ def process_result_tokens(
           break
         else:
           try:
+            token_return.append(tok_id)
+            #logging.info(f"------------------------> token_return: {token_return}")
             token = mix_decode(vocab, tok_id)  # pytype: disable=attribute-error
           except ValueError:
             # This error only occurs when using tests where the vocab range is
@@ -190,7 +193,7 @@ def process_result_tokens(
     sample_return.append(string_so_far)
     if debug:
       logging.info("Sampled return %s", str(sample_return))
-  return sample_return, complete
+  return sample_return, complete, token_return
 
 
 def load_vocab(path: str, extra_ids: int = 0) -> Vocabulary:

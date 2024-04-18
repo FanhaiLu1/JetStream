@@ -504,6 +504,7 @@ def main(args: argparse.Namespace):
   tokenizer_id = args.tokenizer
 
   api_url = f"{args.server}:{args.port}"
+  print(f"----------------------------api_url {api_url}")
 
   tokenizer = get_tokenizer(tokenizer_id)
   if tokenizer == "test" or args.dataset == "test":

@@ -75,6 +75,7 @@ to debug hangs due to bugs in threads (it is easier to debug with live logs).
 """
 
 import dataclasses
+from dataclasses import dataclass, field
 import functools
 import itertools
 import logging
@@ -117,6 +118,12 @@ def delete_pytree(p):
 
   jax.tree_map(delete_leaf, p)
 
+@dataclasses.dataclass
+class ReturnItem:
+  """Both the tokens and string representation"""
+
+  text: list[str]
+  tokens: list[int]
 
 @dataclasses.dataclass
 class ActiveRequest:
@@ -138,6 +145,7 @@ class ActiveRequest:
   ################## Information relevant for detokenization ###################
   # Which generate step this was added at.
   generate_timestep_added: Optional[int] = None
+  tokens: list[int] = field(default_factory=list)
 
   def enqueue_tokens(self, generated_tokens: list[str]):
     """Records information about the step.
@@ -148,6 +156,10 @@ class ActiveRequest:
     This should be called only from within the Drivers background thread.
     """
     self.return_channel.add_result(generated_tokens)
+
+
+  def add_tokens(self, generated_tokens: list[int]):
+    self.tokens.extend(generated_tokens)
 
 
 class JetThread(threading.Thread):
@@ -580,7 +592,7 @@ class Driver:
 
         for slot, request in my_live_requests.items():
           if request is not None:
-            results, complete = token_utils.process_result_tokens(
+            results, complete, tokens = token_utils.process_result_tokens(
                 slot=slot,
                 slot_max_length=request.max_tokens,
                 result_tokens=result_tokens,
@@ -590,6 +602,10 @@ class Driver:
             request.complete = complete
             # Return some tokens.
             request.enqueue_tokens(results)
+            request.add_tokens(tokens)
+            # logging.info(f"------------------------> tokens: {request.tokens}")
+            text = vocab.tokenizer.decode(request.tokens)
+            # logging.info(f"------------------------> text: {text}")
             if request.complete.all():
               request.return_channel.close()
               # Place the slot back on the free queue.
