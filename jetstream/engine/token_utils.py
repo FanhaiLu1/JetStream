@@ -117,7 +117,7 @@ def tokenize_and_pad(
     padded_tokens = tokens[-padded_length:]
   else:
     padded_tokens = np.pad(tokens, (0, padding))
-  return jnp.array(padded_tokens), true_length
+  return padded_tokens, true_length
 
 
 def process_result_tokens(

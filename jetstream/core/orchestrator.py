@@ -588,7 +588,8 @@ class Driver:
         generate_timestep_added, result_tokens = data
         # Disable attribute error because pytype doesn't know this
         # is a result tokens, and we can't annotate the tuple.
-        result_tokens = result_tokens.convert_to_numpy()
+        if isinstance(result_tokens, jax.Array):
+          result_tokens = result_tokens.convert_to_numpy()
 
         for slot, request in my_live_requests.items():
           if request is not None:
