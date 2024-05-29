@@ -258,7 +258,7 @@ class Driver:
     # Stage 2
     # After prefilling, it is placed here in order to get transferred to
     # one of the generate backlogs.
-    # Interleaved Mode: Max size is 1 to increase the HBM utilization
+    # Interleaved Mode: Max size is 1 to increase xthe HBM utilization
     # during generate.
     # Disaggregated Mode: Max size is 4 to allow for 2 prefills to be enqueued
     # while 1 transfer is enqueued while 1 is being transferred.
